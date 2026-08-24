@@ -72,10 +72,12 @@
         }
       }
       function winner(bool){
+      // both popups cause why not? ¬_,¬
         clickNum.innerText = clicks
         clickNum2.innerText = clicks
         end = performance.now()
         console.log(start,end)
+        // update records table if won
         if(bool) localStorage.setItem('find_the_unicorn_leaderboard',JSON.stringify([...JSON.parse(localStorage.getItem('find_the_unicorn_leaderboard')||"[]"),{clicks:clicks,time:((end-start)/1000).toFixed(2),date:new Date()}]))
         timeLen.innerText = `${((end-start)/1000).toFixed(2)}`
         timeLen2.innerText = `${((end-start)/1000).toFixed(2)}`
@@ -84,9 +86,11 @@
       function clickHandler(i,j,elem){
       // -1: clicked ; 0 - to click ; 1 - non-reachable
         if (elem.dataset.state==0) {
+          // initial board lockup
           if (clicks==0){
             document.querySelectorAll("td>button").forEach(e=>{e.dataset.state=1;e.disabled=true})
           }
+          // uncover nearby tiles, 8 around clicked tile
           for (let di = -1; di <= 1; di++) {
             for (let dj = -1; dj <= 1; dj++) {
               if (di == 0 && dj == 0) continue;
@@ -101,16 +105,17 @@
           elem.style.background = `hsl(${clicks},100%,50%)`
           elem.dataset.state=-1
           console.log(i,j,clicks,chain)
-          stairClick()
+          stairClick() // ← crappy audio
           prob = nextPossibles(chain)
           elem.innerText=prob[1]
-          if(clicks>10){
+          // check for win/fail conditions
+          if(clicks>10){ // win
             ran = Math.random()
             if (ran*2<Math.pow(prob[0],2)){
               winner(1)
             }
           }
-          if([...document.querySelectorAll('[data-state]')].every(el => el.getAttribute('data-state') === '-1')){
+          if([...document.querySelectorAll('[data-state]')].every(el => el.getAttribute('data-state') === '-1')){ // fail
             winner(0)
           }
         }
@@ -181,6 +186,8 @@
       function nextPossibles(arr){
         directs = arr.map((p, i) => i ? [sign(p[0]-arr[i-1][0]), sign(p[1]-arr[i-1][1])] : null).filter(Boolean); /*line from gpt*/  // output: [01,10,0-1,-10]
         probs = {"N":0,"S":0,"E":0,"W":0,"NE":0,"NW":0,"SE":0,"SW":0}
+        // send help - idk how to make it smaller... ;-;
+        // counting directions player moved
         directs.forEach(([x, y]) => {
           if (x == 0 && y == 1) probs.N++;
           else if (x == 0 && y == -1) probs.S++;
@@ -193,6 +200,7 @@
         });
         console.log(directs,probs)
         last = directs[directs.length-1]
+        // returning how probable was last move
         if (last[0] == -1 && last[1] == 0) return [probs.N / directs.length, "↑"];
         else if (last[0] == 1 && last[1] == 0) return [probs.S / directs.length, "↓"];
         else if (last[0] == 0 && last[1] == 1) return [probs.E / directs.length, "→"];
@@ -201,21 +209,24 @@
         else if (last[0] == -1 && last[1] == -1) return [probs.NW / directs.length, "↖"];
         else if (last[0] == 1 && last[1] == 1) return [probs.SE / directs.length, "↘"];
         else if (last[0] == 1 && last[1] == -1) return [probs.SW / directs.length, "↙"];
-        else return [directs.length, "•"];
+        else return [directs.length, "•"]; // idk why but somehow this dot doesn't render while should...
       }
       window.onload = () => {
+        // leaderboards
         scores = JSON.parse(localStorage.getItem('find_the_unicorn_leaderboard'))?.sort((a, b) => a.clicks - b.clicks).slice(0,10);
         scores?.forEach((e)=>{
           entry = document.createElement('li');
           entry.innerHTML = `<time>${new Date(e.date).toLocaleDateString("en-US",{year: 'numeric', month: 'long', day: 'numeric'})}<time> => ${e.clicks} clicks and ${e.time}secs`;
           hallOfFame.appendChild(entry);
         })
+        // inverted cause why not??? (:
         antiscores = JSON.parse(localStorage.getItem('find_the_unicorn_leaderboard'))?.sort((a, b) => b.clicks - a.clicks).slice(0,10);
         antiscores?.forEach((e)=>{
           entry = document.createElement('li');
           entry.innerHTML = `<time>${new Date(e.date).toLocaleDateString("en-US",{year: 'numeric', month: 'long', day: 'numeric'})}<time> => ${e.clicks} clicks and ${e.time}secs`;
           hallOfShame.appendChild(entry);
         })
+        // and init
         createTable();
         start=performance.now()
       }
