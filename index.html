@@ -216,14 +216,14 @@
         scores = JSON.parse(localStorage.getItem('find_the_unicorn_leaderboard'))?.sort((a, b) => a.clicks - b.clicks).slice(0,10);
         scores?.forEach((e)=>{
           entry = document.createElement('li');
-          entry.innerHTML = `<time>${new Date(e.date).toLocaleDateString("en-US",{year: 'numeric', month: 'long', day: 'numeric'})}<time> => ${e.clicks} clicks and ${e.time}secs`;
+          entry.innerHTML = `<time>${new Date(e.date).toLocaleDateString("en-US",{year: 'numeric', month: 'long', day: 'numeric'})}</time> => ${e.clicks} clicks and ${e.time}secs`;
           hallOfFame.appendChild(entry);
         })
         // inverted cause why not??? (:
         antiscores = JSON.parse(localStorage.getItem('find_the_unicorn_leaderboard'))?.sort((a, b) => b.clicks - a.clicks).slice(0,10);
         antiscores?.forEach((e)=>{
           entry = document.createElement('li');
-          entry.innerHTML = `<time>${new Date(e.date).toLocaleDateString("en-US",{year: 'numeric', month: 'long', day: 'numeric'})}<time> => ${e.clicks} clicks and ${e.time}secs`;
+          entry.innerHTML = `<time>${new Date(e.date).toLocaleDateString("en-US",{year: 'numeric', month: 'long', day: 'numeric'})}</time> => ${e.clicks} clicks and ${e.time}secs`;
           hallOfShame.appendChild(entry);
         })
         // and init
