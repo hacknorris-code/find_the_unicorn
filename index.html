@@ -7,16 +7,37 @@
       html, body { width:100vw; height:100vh}
       :root{color-scheme:light dark}
       table,th,tr,td,tbody{border:0;border-spacing: 0;}
-      td{width:35px;height:35px;line-height: 0;}
-      td>button{width:35px;height:35px;border-radius:0; border-width:0.125px}
+      td{width:35px;height:35px;line-height: 0;text-align: center;}
+      #main td>button{width:35px;height:35px;border-radius:0; border-width:0.125px}
       *{margin:0;padding:0;box-sizing:border-box;border-collapse:collapse;}
       #gameOver,#gameWin{
         margin: auto;
         inset: 0;
       }
-      #game{flex:1;display:flex;min-width: 0;max-width: 100vw;}
+      #game{flex:1;display:flex;min-width: 0;width: 100%;height:auto;min-height: 0;}
       #sidebar{flex:0 0 25%;text-align: center;}
       #mains{min-width: 0;flex:0 0 75%;display:flex;}
+      /*#mains > table > tbody > tr > td:nth-child(1),#mains > table > tbody > tr > td:nth-child(3) {
+        width:20px;
+      }
+      #mains > table > tbody > tr > td:nth-child(2) {
+        width:auto;
+      }*/
+      #mains > table > tbody > tr > td:first-child,
+        #mains > table > tbody > tr > td:last-child {
+        width: 30px;
+        min-width: 30px;
+        max-width: 30px;
+        padding: 0;
+        }
+
+        #mains > table > tbody > tr > td:nth-child(2) {
+        width: auto;
+        padding: 0;
+        }
+      #hallOfFame,#hallOfShame{
+        display:inline-block;list-style-position:inside;
+      }
       @media (max-width: 800px) {
         #game {
           flex-wrap: wrap;
@@ -32,9 +53,14 @@
     <header><h1>FIND THE UNICORN:</h1></header>
     <main id=game>
       <div id=mains>
-        <table cellspacing="0" cellpadding="0" id=main style="display:inline-table;min-width: 0;table-layout: fixed;width:100%"></table>
+        <table cellspacing="0" cellpadding="0" style=width:100%>
+          <colgroup><col style="width:20px"><col><col style="width:20px"></colgroup>
+          <tr><td id=toplefter >0%</td><td id=topper>0%</td><td id=toprighter>0%</td></tr>
+          <tr><td id=lefter>0%</td><td style="width:100%;height:100%;"><table cellspacing="0" cellpadding="0" id=main style="width:100%;height:100%;"></table></td><td id=righter>0%</td></tr>
+          <tr><td id=bottomlefter>0%</td><td id=bottomer>0%</td><td id=bottomrighter>0%</td></tr>
+        </table>
       </div>
-      <div id=sidebar><h2>high scores:</h2><hr><ol style=display:inline-block;list-style-position:inside; id=hallOfFame></ol><hr><hr><h2>low scores:</h2><hr><ol style=display:inline-block;list-style-position:inside; id=hallOfShame></ol></div>
+      <div id=sidebar style="max-height:100%;overflow: auto;"><h2>high scores:</h2><hr><ol id=hallOfFame></ol><hr><hr><h2>low scores:</h2><hr><ol id=hallOfShame></ol></div>
     </main>
     <footer></footer>
     <dialog id=gameWin style="text-align: center;">
@@ -53,7 +79,7 @@
       <button onclick="download()">DOWNLOAD MAP.</button> | <button onclick="location.reload()">RESTART?</button>
     </dialog>
     <script>
-      const [cols, rows] = ['width', 'height'].map(x => Math.floor(mains.getBoundingClientRect()[x] / 35 )) /*line from gpt*/
+      const [cols, rows] = ['width', 'height'].map(x => Math.floor(main.getBoundingClientRect()[x] / 35 )) /*line from gpt*/
       const actx = new AudioContext();
       const sign = n => Math.sign(n) || 0;
         console.log(cols,rows)
@@ -189,16 +215,25 @@
         probs = {"N":0,"S":0,"E":0,"W":0,"NE":0,"NW":0,"SE":0,"SW":0}
         // send help - idk how to make it smaller... ;-;
         // counting directions player moved
+        // also - been fixing this code on like 6am with no sleep so may not understand code below. but works.
         directs.forEach(([x, y]) => {
-          if (x == 0 && y == 1) probs.N++;
-          else if (x == 0 && y == -1) probs.S++;
-          else if (x == 1 && y == 0) probs.E++;
-          else if (x == -1 && y == 0) probs.W++;
-          else if (x == 1 && y == 1) probs.NE++;
-          else if (x == -1 && y == 1) probs.NW++;
-          else if (x == 1 && y == -1) probs.SE++;
-          else if (x == -1 && y == -1) probs.SW++;
+          if (x == 0 && y == 1) probs.E++;
+          else if (x == 0 && y == -1) probs.W++;
+          else if (x == 1 && y == 0) probs.S++;
+          else if (x == -1 && y == 0) probs.N++;
+          else if (x == 1 && y == 1) probs.SE++;
+          else if (x == -1 && y == 1) probs.NE++;
+          else if (x == 1 && y == -1) probs.SW++;
+          else if (x == -1 && y == -1) probs.NW++;
         });
+        toplefter.innerText=`${(probs.NW*100/ directs.length).toFixed()}%`;
+        topper.innerText=`${(probs.N*100/ directs.length).toFixed()}%`;
+        toprighter.innerText=`${(probs.NE*100/ directs.length).toFixed()}%`;
+        lefter.innerText=`${(probs.W*100/ directs.length).toFixed()}%`;
+        righter.innerText=`${(probs.E*100/ directs.length).toFixed()}%`;
+        bottomlefter.innerText=`${(probs.SW*100/ directs.length).toFixed()}%`;
+        bottomer.innerText=`${(probs.S*100/ directs.length).toFixed()}%`;
+        bottomrighter.innerText=`${(probs.SE*100/ directs.length).toFixed()}%`;
         console.log(directs,probs)
         last = directs[directs.length-1]
         // returning how probable was last move
