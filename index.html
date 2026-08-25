@@ -17,24 +17,16 @@
       #game{flex:1;display:flex;min-width: 0;width: 100%;height:auto;min-height: 0;}
       #sidebar{flex:0 0 25%;text-align: center;}
       #mains{min-width: 0;flex:0 0 75%;display:flex;}
-      /*#mains > table > tbody > tr > td:nth-child(1),#mains > table > tbody > tr > td:nth-child(3) {
-        width:20px;
+      #mains > table > tbody > tr > td:first-child, #mains > table > tbody > tr > td:last-child {
+        width: 40px;
+        min-width: 40px;
+        max-width: 40px;
+        padding: 0;
       }
       #mains > table > tbody > tr > td:nth-child(2) {
-        width:auto;
-      }*/
-      #mains > table > tbody > tr > td:first-child,
-        #mains > table > tbody > tr > td:last-child {
-        width: 30px;
-        min-width: 30px;
-        max-width: 30px;
-        padding: 0;
-        }
-
-        #mains > table > tbody > tr > td:nth-child(2) {
         width: auto;
         padding: 0;
-        }
+      }
       #hallOfFame,#hallOfShame{
         display:inline-block;list-style-position:inside;
       }
