@@ -177,12 +177,14 @@
           }
           clicks++
           chain.push([i,j])
-          elem.style.background = `hsl(${clicks},100%,50%)`
+          console.log(clicks)
+          elem.style.backgroundColor = `hsl(${clicks},100%,50%)`
           elem.dataset.state=-1
           stairClick() // ← crappy audio
           prob = nextPossibles(chain)
           elem.innerText=prob[1]
-          document.body.style.background = `hsl(${180-(180*prob[0])},100%,50% / 10%)`
+          console.log(180-(180*prob[0]))
+          document.body.style.background = `hsl(${180-(180*prob[0])},100%,50%,0.1)`
           if(previous)length+=(((i-previous[0])**2)+((j-previous[1])**2))**.5
           previous=[i,j]
           // check for win/fail conditions
