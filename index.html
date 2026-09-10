@@ -43,7 +43,7 @@
     </style>
   </head>
   <body style="display:flex;flex-direction: column;">
-  <header><h1>FIND THE UNICORN:</h1></header>
+    <header><h1>FIND THE UNICORN:</h1></header>
     <main id=game>
       <div id=mains>
         <table cellspacing="0" cellpadding="0" style=width:100%;height:100%>
@@ -58,7 +58,7 @@
     <footer style="text-align: center;"><a href="//github.com/hacknorris-code/find_the_unicorn">game source code</a> © hacknorris 2026</footer>
     <dialog id=gameWin style="text-align:center;">
       <h2>YOU FOUND UNICORN!!!</h2>
-      <picture>
+      <picture onclick="unlockAchievement('how sweet...')">
         <source srcset="unicorn_light_min.svg" media="(prefers-color-scheme: dark)">
         <img src="unicorn_dark_min.svg" alt="svg drawing of a unicorn" style=height:20vw;aspect-ratio:1>
       </picture>
@@ -71,30 +71,37 @@
       <p>it took you <span id=clickNum2></span> clicks and <span id=timeLen2></span> seconds just to find out it haven't existed...</p>
       <button onclick="download()">DOWNLOAD MAP.</button> | <button onclick="location.reload()">RESTART?</button>
     </dialog>
-    <dialog id="story" style="text-align:center;" popover>
-      <p>Story:</p>
-      you found ancient gps-like device with unicorn in center and 8 meters around it.<br>
-      in a book nearby it says that it may help find a unicorn.<br>
-      there also is written that unicorns are rare creatures which avoid meeting humans<br>
+    <dialog id="story" style="text-align:center;padding:20px" popover>
+      <p>Story:</p><hr><br>
+      you found ancient device with sigils in center and 8 meters around it.<br>
+      in a book nearby it says that it may help find a <span onclick="unlockAchievement('not this unicorn')" style="background:linear-gradient(90deg in hsl longer hue, red, red);-webkit-background-clip:text;background-clip:text;color:transparent">unicorn</span>.<br>
+      there also is written that they are rare creatures which avoid meeting humans<br>
       and will do anything to not be found by a human by looking at them.<br>
       device should directly abuse this behavior.
     </dialog>
-    <dialog id="achievs" style=text-align:center;max-width:80vw popover>
+    <dialog id="achievs" style=text-align:center;max-width:80vw;max-height:80vh popover>
       <p>Achievements:</p>
-      <div style="display:grid;grid-template-columns: repeat(auto-fit, minmax(25em, 1fr));gap: 20px;width: 100%;height:100%;max-width: 80vw" id=achGrid></div>
+      <div style="display:grid;grid-template-columns: repeat(auto-fit, minmax(min(25em, 100%), 1fr));gap: 20px;width: 100%;height:100%;max-width: 80vw;padding:20px" id=achGrid></div>
     </dialog>
     <script>
+      // red - hard, yellow - medium, green - easy, blue - ui
       achievements={
-      "nothing":{"description":"nothing yet in this section","icon":""},
-      "hat-fail":{"description": "failed 3 times in a row...","icon":"🥉"},
-      "too quick":{"description":"you click quicker than half second","icon":"⚡"},
-      "loopy":{"description":"all your clicks were orbiting a single point","icon":"🌀"}, // n → ne → e → es → s → sw → w → nw → n → ne ... or in reverse, starting on any
-      "GOAT":{"description":"you caught unicorn in 11 moves","icon":"🥳"},
-      "tower":{"description":"all your moves were following rules of a chess tower","icon":"🗼"},
-      "hiker":{"description":"your trail was longer than area available","icon":"🚶‍➡️"},
-      "close encounters":{"description":"unicorn appeared next to your starting point","icon":"📡"},
-      "neverending story":{"description":"you managed to continue playing after ending game","icon":"⛓️‍💥"},
-      "hacker":{"description":"Y0U 3X3CU73D 34573r 366 FUNC710N 1N 8r0W53r C0N5013","icon":"🧑‍💻"}
+      "nothing":{"description":"nothing yet in this section","icon":"","color":"#8882"},
+      "hat-fail":{"description": "failed 3 times in a row... you really may be a unicorn.","icon":"🥉","color":"#f002"},
+      "where unicorn?":{"description":"failed at least once","icon":"👻","color":"#ff02"},
+      "too quick":{"description":"you click quicker than half second","icon":"⚡","color":"#ff02"},
+      "loopy":{"description":"all your clicks were orbiting a single point","icon":"🌀","color":"#0f02"}, // n → ne → e → es → s → sw → w → nw → n → ne ... or in reverse, starting on any. whatev
+      "GOAT":{"description":"you caught unicorn in 11 moves","icon":"🥳","color":"#ff02"},
+      "tower":{"description":"all your moves were following rules of a chess tower","icon":"🗼","color":"#0f02"},
+      "hiker":{"description":"your trail was longer than area available","icon":"🚶‍➡️","color":"#f002"},
+      "close encounters":{"description":"unicorn appeared next to your starting point","icon":"📡","color":"#ff02"},
+      "neverending story":{"description":"you managed to continue playing after ending game","icon":"⛓️‍💥","color":"#00f2"}, // i know it's a bug, right?
+      "hacker":{"description":"Y0U 3X3CU73D 34573r 366 FUNC710N 1N 8r0W53r C0N5013","icon":"🧑‍💻","color":"#00f2"},
+      "yin yang":{"description":"all moves perfectly balanced. as all things should be.","icon":"☯️","color":"#f002"},
+      "snake":{"description":"is that a maze? or is that a road?","icon":"🐍","color":"#0f02"},
+      "warp":{"description":"does that mean there is no border, actually?","icon":"🧭","color":"#0f02"},
+      "how sweet...":{"description":"patted unicorn","icon":"🦄","color":"#00f2"},
+      "not this unicorn":{"description":"i appreciate you found something resembling unicorn on this page but actually it wasn't this unicorn you want to find","icon":"🤷","color":"#00f2"}
       }
       const [cols, rows] = ['width', 'height'].map(x => Math.floor(main.getBoundingClientRect()[x] / 35 )) /*line from gpt*/
       const actx = new AudioContext();
@@ -108,6 +115,8 @@
       chain=[]
       length=0
       finished=0
+      snaker=1
+      warped=0
       function easterEgg(){
         unlockAchievement("hacker")
       }
@@ -130,7 +139,7 @@
         achGrid.innerHTML=""
         JSON.parse(localStorage.getItem('find_the_unicorn_achievements')||'["nothing"]').forEach((i)=>{
           achievement = document.createElement('div')
-          achievement.innerHTML = `<fieldset><legend>${i}</legend><h1 style='float:left;aspect-ratio:1'>${achievements[i].icon}</h1><p style='float:left'>${achievements[i].description}</p>`
+          achievement.innerHTML = `<fieldset style="background-color:${achievements[i].color}"><legend>${i}</legend><h1 style='float:left;aspect-ratio:1'>${achievements[i].icon}</h1><p style='float:left;width:85%'>${achievements[i].description}</p>`
           achGrid.appendChild(achievement)
         })
       }
@@ -140,10 +149,11 @@
         clickNum2.innerText = clicks
         end = performance.now()
         // update records table if won
-        if(bool&&(!finished)) localStorage.setItem('find_the_unicorn_leaderboard',JSON.stringify([...JSON.parse(localStorage.getItem('find_the_unicorn_leaderboard')||"[]"),{clicks:clicks,time:((end-start)/1000).toFixed(2),date:new Date()}]))
+        if(bool&&(!finished)) localStorage.setItem('find_the_unicorn_leaderboard',JSON.stringify([...JSON.parse(localStorage.getItem('find_the_unicorn_leaderboard')||"[]"),{clicks:clicks,path:length.toFixed(2),time:((end-start)/1000).toFixed(2),date:new Date()}]))
         time=`${((end-start)/1000).toFixed(2)}`
         timeLen.innerText = timeLen2.innerText = time
         // achievements ↓
+        if (snaker) unlockAchievement("snake")
         if (bool&&clicks<12) unlockAchievement("GOAT")
         if (clicks/parseFloat(time)>=2) unlockAchievement("too quick")
         if (length > cols*rows) unlockAchievement("hiker")
@@ -151,6 +161,7 @@
         checkLoopy()
         if (!finished){
           bool?localStorage.setItem('find_the_unicorn_counter', `${parseInt(localStorage.getItem('find_the_unicorn_counter'))+1 || '1'}`)&&localStorage.setItem('find_the_unicorn_neg_counter', `0`):localStorage.setItem('find_the_unicorn_neg_counter', `${parseInt(localStorage.getItem('find_the_unicorn_neg_counter'))+1 || '1'}`);
+          if (parseInt(localStorage.getItem('find_the_unicorn_neg_counter'))>=1) unlockAchievement("where unicorn?")
           if (parseInt(localStorage.getItem('find_the_unicorn_neg_counter'))>=3) unlockAchievement("hat-fail")
           finished=1
         }
@@ -185,7 +196,9 @@
           elem.innerText=prob[1]
           console.log(180-(180*prob[0]))
           document.body.style.background = `hsl(${180-(180*prob[0])},100%,50%,0.1)`
-          if(previous)length+=(((i-previous[0])**2)+((j-previous[1])**2))**.5
+          if(previous) length+=(((i-previous[0])**2)+((j-previous[1])**2))**.5
+          if(previous&&(((i==0&&previous[0]===rows-1)||(i===rows-1&&previous[0]===0))||((j==0&&previous[1]===cols-1)||(j===cols-1&&previous[1]===0)))) warped=1
+          if(previous && (Math.abs(i-previous[0])>1) &&(Math.abs(j-previous[1])>1)) snaker=0
           previous=[i,j]
           // check for win/fail conditions
           if(clicks>10){ // win
@@ -193,6 +206,12 @@
             if (ran<Math.pow(1-prob[0],2)){
               if (["NE", "NW", "SE", "SW"].every(d=>prob[2][d]===0)) unlockAchievement("tower")
               if (finished) unlockAchievement("neverending story")
+              if (warped) unlockAchievement("warp")
+              l=prob[2]["NW"]+prob[2]["W"]+prob[2]["SW"]
+              r=prob[2]["NE"]+prob[2]["E"]+prob[2]["SE"]
+              t=prob[2]["NW"]+prob[2]["N"]+prob[2]["NE"]
+              b=prob[2]["SW"]+prob[2]["S"]+prob[2]["SE"]
+              if(Math.abs(l-r)<=1&&Math.abs(t-b)<=1) unlockAchievement("yin yang")
               winner(1,i,j)
             }
           }
@@ -274,58 +293,109 @@
           URL.revokeObjectURL(url);
         }, "image/png");
       }
+      const DIRS = { "01":"E","0-1":"W","10":"S","-10":"N",
+      "11":"SE","-11":"NE","1-1":"SW","-1-1":"NW" };
+      const SYM  = { N:"↑",S:"↓",E:"→",W:"←",NE:"↗",NW:"↖",SE:"↘",SW:"↙" };
+
+      function nextPossibles(arr) {
+        const dirs = [];
+        for (let i = 1; i < arr.length; i++) dirs.push(DIRS[Math.sign(arr[i][0]-arr[i-1][0]) + "" +Math.sign(arr[i][1]-arr[i-1][1])]);
+        if (clicks < 2) return [dirs.length, "🏠"];
+
+        // --- global single-move stats (for your %-display widgets) ---
+        const probs = {};
+        dirs.forEach(d => probs[d] = (probs[d] || 0) + 1);
+        const n = dirs.length;
+        toplefter.innerText   = ((probs.NW||0)*100/n).toFixed() + "%";
+        topper.innerText     = ((probs.N ||0)*100/n).toFixed() + "%";
+        toprighter.innerText = ((probs.NE||0)*100/n).toFixed() + "%";
+        lefter.innerText     = ((probs.W ||0)*100/n).toFixed() + "%";
+        righter.innerText    = ((probs.E ||0)*100/n).toFixed() + "%";
+        bottomlefter.innerText  = ((probs.SW||0)*100/n).toFixed() + "%";
+        bottomer.innerText       = ((probs.S ||0)*100/n).toFixed() + "%";
+        bottomrighter.innerText = ((probs.SE||0)*100/n).toFixed() + "%";
+
+        // --- NEW: bigram table, keyed by pairs of consecutive moves ---
+        // trans["N>E"]["S"] = how many times S followed an N then E
+        const trans = {};
+        for (let i = 2; i < dirs.length; i++) {
+          const key = dirs[i-2] + ">" + dirs[i-1];
+          (trans[key] ??= {});
+          trans[key][dirs[i]] = (trans[key][dirs[i]] || 0) + 1;
+        }
+
+          // --- predict using the last TWO moves ---
+        const key = dirs.at(-2) + ">" + dirs.at(-1);
+        const from = trans[key];
+
+        if (from) {
+          let best = null, total = 0;
+          for (const [next, count] of Object.entries(from)) {
+            total += count;
+            if (!best || count > from[best]) best = next;
+          }
+          return [from[best] / total, SYM[best], from, SYM[dirs.at(-1)]];
+        }
+
+        // fallback: not enough history for this pair yet — old behaviour
+        const last = dirs.at(-1);
+        return [(probs[last] || 0) / n, SYM[last], probs];
+      }
       /**/
       /* gpt block end*/
       /**/
-      function nextPossibles(arr){
-        directs = arr.map((p, i) => i ? [sign(p[0]-arr[i-1][0]), sign(p[1]-arr[i-1][1])] : null).filter(Boolean); /*line from gpt*/  // output: [01,10,0-1,-10]
-        if (clicks<2) return [directs.length, "🏠"];
-        probs = {"N":0,"S":0,"E":0,"W":0,"NE":0,"NW":0,"SE":0,"SW":0}
-        // send help - idk how to make it smaller... ;-;
-        // counting directions player moved
-        // also - been fixing this code on like 6am with no sleep so may not understand code below. but works.
-        directs.forEach(([x, y]) => {
-          if (x == 0 && y == 1) probs.E++;
-          else if (x == 0 && y == -1) probs.W++;
-          else if (x == 1 && y == 0) probs.S++;
-          else if (x == -1 && y == 0) probs.N++;
-          else if (x == 1 && y == 1) probs.SE++;
-          else if (x == -1 && y == 1) probs.NE++;
-          else if (x == 1 && y == -1) probs.SW++;
-          else if (x == -1 && y == -1) probs.NW++;
-        });
-        toplefter.innerText=`${(probs.NW*100/ directs.length).toFixed()}%`;
-        topper.innerText=`${(probs.N*100/ directs.length).toFixed()}%`;
-        toprighter.innerText=`${(probs.NE*100/ directs.length).toFixed()}%`;
-        lefter.innerText=`${(probs.W*100/ directs.length).toFixed()}%`;
-        righter.innerText=`${(probs.E*100/ directs.length).toFixed()}%`;
-        bottomlefter.innerText=`${(probs.SW*100/ directs.length).toFixed()}%`;
-        bottomer.innerText=`${(probs.S*100/ directs.length).toFixed()}%`;
-        bottomrighter.innerText=`${(probs.SE*100/ directs.length).toFixed()}%`;
-        last = directs[directs.length-1]
-        // returning how probable was last move
-        if (last[0] == -1 && last[1] == 0) return [probs.N / directs.length, "↑",probs];
-        else if (last[0] == 1 && last[1] == 0) return [probs.S / directs.length, "↓",probs];
-        else if (last[0] == 0 && last[1] == 1) return [probs.E / directs.length, "→",probs];
-        else if (last[0] == 0 && last[1] == -1) return [probs.W / directs.length, "←",probs];
-        else if (last[0] == -1 && last[1] == 1) return [probs.NE / directs.length, "↗",probs];
-        else if (last[0] == -1 && last[1] == -1) return [probs.NW / directs.length, "↖",probs];
-        else if (last[0] == 1 && last[1] == 1) return [probs.SE / directs.length, "↘",probs];
-        else if (last[0] == 1 && last[1] == -1) return [probs.SW / directs.length, "↙",probs];
-      }
+
+      // original function i wrote:
+      // function nextPossibles(arr){
+      //   directs = arr.map((p, i) => i ? [sign(p[0]-arr[i-1][0]), sign(p[1]-arr[i-1][1])] : null).filter(Boolean); /*line from gpt*/  // output: [01,10,0-1,-10]
+      //   if (clicks<2) return [directs.length, "🏠"];
+      //   probs = {"N":0,"S":0,"E":0,"W":0,"NE":0,"NW":0,"SE":0,"SW":0}
+      //   // send help - idk how to make it smaller... ;-;
+      //   // counting directions player moved
+      //   // also - been fixing this code on like 6am with no sleep so may not understand code below. but works.
+      //   directs.forEach(([x, y]) => {
+      //     if (x == 0 && y == 1) probs.E++;
+      //     else if (x == 0 && y == -1) probs.W++;
+      //     else if (x == 1 && y == 0) probs.S++;
+      //     else if (x == -1 && y == 0) probs.N++;
+      //     else if (x == 1 && y == 1) probs.SE++;
+      //     else if (x == -1 && y == 1) probs.NE++;
+      //     else if (x == 1 && y == -1) probs.SW++;
+      //     else if (x == -1 && y == -1) probs.NW++;
+      //   });
+      //   toplefter.innerText=`${(probs.NW*100/ directs.length).toFixed()}%`;
+      //   topper.innerText=`${(probs.N*100/ directs.length).toFixed()}%`;
+      //   toprighter.innerText=`${(probs.NE*100/ directs.length).toFixed()}%`;
+      //   lefter.innerText=`${(probs.W*100/ directs.length).toFixed()}%`;
+      //   righter.innerText=`${(probs.E*100/ directs.length).toFixed()}%`;
+      //   bottomlefter.innerText=`${(probs.SW*100/ directs.length).toFixed()}%`;
+      //   bottomer.innerText=`${(probs.S*100/ directs.length).toFixed()}%`;
+      //   bottomrighter.innerText=`${(probs.SE*100/ directs.length).toFixed()}%`;
+      //   last = directs[directs.length-1]
+      //   // returning how probable was last move
+      //   if (last[0] == -1 && last[1] == 0) return [probs.N / directs.length, "↑",probs];
+      //   else if (last[0] == 1 && last[1] == 0) return [probs.S / directs.length, "↓",probs];
+      //   else if (last[0] == 0 && last[1] == 1) return [probs.E / directs.length, "→",probs];
+      //   else if (last[0] == 0 && last[1] == -1) return [probs.W / directs.length, "←",probs];
+      //   else if (last[0] == -1 && last[1] == 1) return [probs.NE / directs.length, "↗",probs];
+      //   else if (last[0] == -1 && last[1] == -1) return [probs.NW / directs.length, "↖",probs];
+      //   else if (last[0] == 1 && last[1] == 1) return [probs.SE / directs.length, "↘",probs];
+      //   else if (last[0] == 1 && last[1] == -1) return [probs.SW / directs.length, "↙",probs];
+      // }
+
       window.onload = () => {
         // leaderboards
         scores = JSON.parse(localStorage.getItem('find_the_unicorn_leaderboard'))?.sort((a, b) => a.clicks - b.clicks).slice(0,10);
         scores?.forEach((e)=>{
           entry = document.createElement('li');
-          entry.innerHTML = `<time>${new Date(e.date).toLocaleDateString("en-US",{year: 'numeric', month: 'long', day: 'numeric'})}</time> => ${e.clicks} clicks and ${e.time}secs`;
+          entry.innerHTML = `<time>${new Date(e.date).toLocaleDateString("en-US",{year: 'numeric', month: 'long', day: 'numeric'})}</time> => ${e.clicks} clicks (${e.path} km) and ${e.time}secs`;
           hallOfFame.appendChild(entry);
         })
         // inverted cause why not??? (:
         antiscores = JSON.parse(localStorage.getItem('find_the_unicorn_leaderboard'))?.sort((a, b) => b.clicks - a.clicks).slice(0,10);
         antiscores?.forEach((e)=>{
           entry = document.createElement('li');
-          entry.innerHTML = `<time>${new Date(e.date).toLocaleDateString("en-US",{year: 'numeric', month: 'long', day: 'numeric'})}</time> => ${e.clicks} clicks and ${e.time}secs`;
+          entry.innerHTML = `<time>${new Date(e.date).toLocaleDateString("en-US",{year: 'numeric', month: 'long', day: 'numeric'})}</time> => ${e.clicks} clicks (${e.path} km) and ${e.time}secs`;
           hallOfShame.appendChild(entry);
         })
         // and init
