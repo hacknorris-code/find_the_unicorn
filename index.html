@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FIND THE UNICORN</title>
     <style>
-      html, body { width:100vw; height:100vh}
+      html, body { width:100vw; height:100vh;background-color: Canvas;color: CanvasText;}
       :root{color-scheme:light dark}
       table,th,tr,td,tbody{border:0;border-spacing: 0;}
       td{width:35px;height:35px;line-height: 0;text-align: center;}
@@ -55,7 +55,7 @@
       </div>
       <div id=sidebar style="max-height:100%;overflow: auto;"><h3>unicorns found: <span id=unicorns>0</span></h3><br><button style="height:2em;width:40%" popovertarget="story">📖 story</button> | <button style="height:2em;width:40%" popovertarget="achievs" onclick="showAchievements()">🎯 achievements</button><br><br><hr><h2>high scores:</h2><hr><ol id=hallOfFame></ol><hr><hr><h2>low scores:</h2><hr><ol id=hallOfShame></ol></div>
     </main>
-    <footer style="text-align: center;"><a href="//github.com/hacknorris-code/find_the_unicorn">game source code</a> © hacknorris 2026</footer>
+    <footer style="text-align: center;display:block"><a href="//github.com/hacknorris-code/find_the_unicorn">game source code</a> © hacknorris 2026</footer>
     <dialog id=gameWin style="text-align:center;">
       <h2>YOU FOUND UNICORN!!!</h2>
       <picture onclick="unlockAchievement('how sweet...')">
@@ -101,7 +101,8 @@
       "snake":{"description":"is that a maze? or is that a road?","icon":"🐍","color":"#0f02"},
       "warp":{"description":"does that mean there is no border, actually?","icon":"🧭","color":"#0f02"},
       "how sweet...":{"description":"patted unicorn","icon":"🦄","color":"#00f2"},
-      "not this unicorn":{"description":"i appreciate you found something resembling unicorn on this page but actually it wasn't this unicorn you want to find","icon":"🤷","color":"#00f2"}
+      "not this unicorn":{"description":"i appreciate you found something resembling unicorn on this page but actually it wasn't this unicorn you want to find","icon":"🤷","color":"#00f2"},
+      "rainbow":{"description":"you used all parts of rainbow on board","icon":"🌈","color":"#f002"}
       }
       const [cols, rows] = ['width', 'height'].map(x => Math.floor(main.getBoundingClientRect()[x] / 35 )) /*line from gpt*/
       const actx = new AudioContext();
@@ -189,6 +190,7 @@
           clicks++
           chain.push([i,j])
           console.log(clicks)
+          if (clicks/360>=1) unlockAchievement("rainbow")
           elem.style.backgroundColor = `hsl(${clicks},100%,50%)`
           elem.dataset.state=-1
           stairClick() // ← crappy audio
