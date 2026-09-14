@@ -63,13 +63,13 @@
         <img src="unicorn_dark_min.svg" alt="svg drawing of a unicorn" style=height:20vw;aspect-ratio:1>
       </picture>
       <p>it took you <span id=clickNum></span> clicks and <span id=timeLen></span> seconds</p>
-      <button onclick="download()">DOWNLOAD MAP.</button> | <button onclick="location.reload()">RESTART?</button>
+      <button onclick="download()">DOWNLOAD MAP.</button> | <button onclick="location.replace(location.href);">RESTART?</button>
     </dialog>
     <dialog id=gameOver style="text-align:center;">
       <h2>THERE WAS NO UNICORN...</h2>
       <hr><p>i lied. here is no unicorn actually</p><p><small>or maybe there is unicorn but on the other side of screen? who knows...</small></p><hr>
       <p>it took you <span id=clickNum2></span> clicks and <span id=timeLen2></span> seconds just to find out it haven't existed...</p>
-      <button onclick="download()">DOWNLOAD MAP.</button> | <button onclick="location.reload()">RESTART?</button>
+      <button onclick="download()">DOWNLOAD MAP.</button> | <button onclick="location.replace(location.href);">RESTART?</button>
     </dialog>
     <dialog id="story" style="text-align:center;padding:20px" popover>
       <p>Story:</p><hr><br>
@@ -295,6 +295,7 @@
           URL.revokeObjectURL(url);
         }, "image/png");
       }
+
       const DIRS = { "01":"E","0-1":"W","10":"S","-10":"N",
       "11":"SE","-11":"NE","1-1":"SW","-1-1":"NW" };
       const SYM  = { N:"↑",S:"↓",E:"→",W:"←",NE:"↗",NW:"↖",SE:"↘",SW:"↙" };
